@@ -26,6 +26,8 @@ const chargingStationSchema = new mongoose.Schema({
         type:Date,
         default:Date.now
     },
+    latitude:Number,
+    longitude:Number,
 
 },{timestamps:true});
 
