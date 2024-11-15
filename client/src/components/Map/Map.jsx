@@ -1,14 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import axios from "axios";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { Icon } from "leaflet";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import "leaflet/dist/leaflet.css";
+import { useLocation } from 'react-router-dom';
 
 const Map = () => {
     const [location, setLocation] = useState("");
     const [timeSlot, setTimeSlot] = useState("");
     const [stations, setStations] = useState([]);
+    const query = new URLSearchParams(useLocation().search)
+    const navigate = useNavigate();
+
+
+    useEffect(() => {
+        const loc = query.get("location");
+        if (loc && loc !== location) {  
+            setLocation(loc);  
+            fetchStations(loc);
+        }
+    }, [query, location]); 
+
 
     const fetchStations = async (location) => {
         try {
@@ -45,7 +58,8 @@ const Map = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (location) {
-            await fetchStations(location);
+            navigate(`?location=${location}`);
+            await fetchStations(location); 
         } else {
             console.error("Location is required!");
         }
@@ -55,6 +69,12 @@ const Map = () => {
         iconUrl: "https://cdn-icons-png.flaticon.com/128/2776/2776067.png",
         iconSize: [34, 34]
     });
+
+    const handleLocationChange = (e) => {
+        const newLocation = e.target.value;
+        setLocation(newLocation);  // Update the location state
+        navigate(`?location=${newLocation}`);  // Update the URL with the new location query
+    };
 
     return (
         <div className='flex min-h-screen'>
@@ -70,7 +90,7 @@ const Map = () => {
                             placeholder="Enter your location"
                             className="p-5 bg-transparent text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 w-full"
                             value={location}
-                            onChange={(e) => setLocation(e.target.value)}
+                            onChange={handleLocationChange}
                         />
                     </div>
 

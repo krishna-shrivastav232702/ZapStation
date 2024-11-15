@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Card } from "flowbite-react";
 import { AuthContext } from '../../Context/AuthProvider';
@@ -25,8 +25,8 @@ const SingleStation = () => {
     const handleBookSlot = async (slotId) => {
         try {
             const response = await axios.post(`http://localhost:7019/slot/bookslot/${slotId}/${user.uid}`);
-            alert(response.data.message); 
-            navigate(`/bookSlot/:${slotId}/${user.uid}`);
+            alert(response.data.message);
+            navigate(`/bookSlot/${slotId}/${user.uid}`);
         } catch (error) {
             console.error("Error booking slot:", error.message);
             alert("Failed to book the slot. Please try again.");
@@ -60,14 +60,40 @@ const SingleStation = () => {
                                 <strong>Slot Status:</strong> {slot.status}
                             </p>
                             {slot.status === 'available' ? (
-                                <button
-                                    onClick={() => handleBookSlot(slot._id)}
-                                    className='bg-white font-black hover:bg-black hover:text-white  py-2 rounded-2xl transition duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-105'
-                                >
-                                    Book Slot {index + 1}
-                                </button>
+                                <div className="flex space-x-4">
+                                    {slot.status === 'available' ? (
+                                        <>
+                                            <button
+                                                onClick={() => handleBookSlot(slot._id)}
+                                                className='bg-white font-bold hover:bg-black px-2 hover:text-white py-2 rounded-2xl transition duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-105'
+                                            >
+                                                Book Slot {index + 1}
+                                            </button>
+                                            <Link to="/map">
+                                                <button
+
+                                                    className='bg-red-500 font-bold text-white hover:bg-white hover:text-red-500 py-2 rounded-2xl transition duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-105 px-2'
+                                                >
+                                                    Revert To map
+                                                </button>
+                                            </Link>
+                                        </>
+                                    ) : (
+                                        <p className='text-red-500'>Slot is {slot.status}</p>
+                                    )}
+                                </div>
                             ) : (
-                                <p className='text-red-500'>Slot is {slot.status}</p>
+                                <div className='flex space-x-4'>
+                                    <p className='text-red-500 mt-2'>Slot is {slot.status}</p>
+                                    <Link to="/map">
+                                        <button
+
+                                            className='bg-red-500 font-bold text-white hover:bg-white hover:text-red-500 py-2 rounded-2xl transition duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-105 px-2'
+                                        >
+                                            Revert To map
+                                        </button>
+                                    </Link>
+                                </div>
                             )}
                         </Card>
                     ))

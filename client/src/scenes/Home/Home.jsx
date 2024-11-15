@@ -1,17 +1,27 @@
 import React, { useContext, useState } from 'react'
 import { useLocation } from "react-router-dom"
 import { AuthContext } from "../../Context/AuthProvider"
+import { useNavigate } from 'react-router-dom'
 import { FaSearch } from "react-icons/fa"
 import { Link } from 'react-router-dom'
 import image1 from "../../assets/image1.png"
+import MyFooter from '../Footer.jsx/MyFooter'
 
 const Home = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleInputChange = (e) => {
     setSearchQuery(e.target.value);
+  }
+
+  const handleSearch = () => {
+    // Redirect to the Map page with the searchQuery as a query parameter
+    if (searchQuery) {
+      navigate(`/map?location=${searchQuery}`);
+    }
   }
 
   return (
@@ -31,7 +41,7 @@ const Home = () => {
                 onChange={handleInputChange}
                 className="w-full px-6 py-3 bg-transparent text-black text-lg placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-400 rounded-full"
               />
-              <FaSearch className="text-black absolute right-6 cursor-pointer text-xl hover:scale-110 hover:transition-all hover:ease-in-out duration-500" />
+              <FaSearch className="text-black absolute right-6 cursor-pointer text-xl hover:scale-110 hover:transition-all hover:ease-in-out duration-500" onClick={handleSearch} />
             </div>
 
 
@@ -84,6 +94,7 @@ const Home = () => {
           </div>
         </div>
       </div>
+      <MyFooter/>
     </div>
   );
 }
