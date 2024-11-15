@@ -1,11 +1,13 @@
 import React from "react"
+import Map from "./components/Map/Map"
+import {Outlet } from "react-router-dom"
 
 function App() {
 
   return (
-    <>
-     App  
-    </>
+    <div>
+      <Outlet/>  
+    </div>
   )
 }
 
