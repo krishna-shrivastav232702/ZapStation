@@ -57,7 +57,7 @@ export const getAllStations = async (req, res) => {
         const api_key = process.env.OPEN_CAGE_API;
         console.log("before geocode");
         const geoCodeUrl = `https://api.opencagedata.com/geocode/v1/json?key=${api_key}&q=${encodeURIComponent(location)}&pretty=1&no_annotations=1`;
-        console.log(geoCodeUrl);
+        // console.log(geoCodeUrl);
         const geoResponse = await axios.get(geoCodeUrl);
         const geoData = geoResponse.data.results[0];
 
@@ -80,12 +80,12 @@ export const getAllStations = async (req, res) => {
 export const getParticularStation = async (req, res) => {
     const { id } = req.params;
     try {
-        const station = await ChargingStation.findById({_id:id });
+        const station = await ChargingStation.findOne({uuid:id}).populate("addressInfo").populate("connectionType").populate("slots");
+        console.log(station);
         if (!station) {
             console.log("Station not found");
             return res.status(404).json({ message: error.message });
         }
-
         return res.status(200).json(station);
     } catch (error) {
         console.log("Error fetching the station");

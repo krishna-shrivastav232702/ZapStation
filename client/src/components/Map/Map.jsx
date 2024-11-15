@@ -2,85 +2,65 @@ import React, { useState } from 'react';
 import axios from "axios";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { Icon } from "leaflet";
+import { Link } from 'react-router-dom';
 import "leaflet/dist/leaflet.css";
 
 const Map = () => {
-
     const [location, setLocation] = useState("");
     const [timeSlot, setTimeSlot] = useState("");
     const [stations, setStations] = useState([]);
-   
 
-
-    const fetchStations = async(location)=>{
-        console.log("inside fetchStations");
+    const fetchStations = async (location) => {
         try {
-            console.log(location);
             const response = await axios.get("http://localhost:7019/station/allStations", {
                 params: { location },
             });
             const stationsData = response.data;
-            // const geodata=val[0].addressInfo;
-            // const res = await axios.get("http://localhost:7019/station/lat",{
-            //     params:{geodata},
-            // });
-            // console.log(res);
-            // setStations(response.data);
-
-            const stationMarkers=[];
-
+            const stationMarkers = [];
 
             for (const station of stationsData) {
-                const geodata = station.addressInfo; // Assuming this has data needed for geolocation
+                const uuid = station.uuid;
+                const geodata = station.addressInfo;
                 try {
                     const geoRes = await axios.get("http://localhost:7019/station/lat", {
                         params: { geodata },
                     });
-                    
-    
-                    // Add marker data for the station
+
                     stationMarkers.push({
-                        id: station.id || Date.now(), // Use unique ID from station data
-                        geocode: [geoRes.data[1], geoRes.data[0]], // Lat and Long from controller
-                        popup: station.name || "Station", // Default name or fallback
+                        id: uuid || Date.now(),
+                        geocode: [geoRes.data[1], geoRes.data[0]],
+                        popup: station.name || "Station",
                     });
                 } catch (geoError) {
                     console.error(`Error fetching geolocation for station ${station.id}:`, geoError);
                 }
             }
-            const value = stationMarkers[0].geocode[0];
-            console.log(value);
-            setStations(stationMarkers);
 
-            
+            setStations(stationMarkers);
         } catch (error) {
             console.error("error fetching stations");
         }
-    }
-
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (location) {
-            console.log(location);
             await fetchStations(location);
         } else {
             console.error("Location is required!");
         }
     };
 
-    const customIcon=new Icon({
-        iconUrl:"https://cdn-icons-png.flaticon.com/128/2776/2776067.png",
-        iconSize:[34,34]
-    })
+    const customIcon = new Icon({
+        iconUrl: "https://cdn-icons-png.flaticon.com/128/2776/2776067.png",
+        iconSize: [34, 34]
+    });
 
     return (
         <div className='flex min-h-screen'>
             <div className='flex items-center justify-evenly'>
                 <form onSubmit={handleSubmit} className="space-y-6 w-96 ml-20">
-                    <h1 className='font-bold text-3xl mb-20'>
-                        Reserve your ZapSlot now
-                    </h1>
+                    <h1 className='font-bold text-3xl mb-20'>Reserve your ZapSlot now</h1>
                     <div className="flex flex-col">
                         <label htmlFor="location" className="text-black mb-2">Location</label>
                         <input
@@ -143,10 +123,16 @@ const Map = () => {
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
                     {
-                        
                         stations.map((station) => (
                             <Marker key={station.id} position={station.geocode} icon={customIcon}>
-                                <Popup><h2>{station.popup}</h2></Popup>
+                                <Popup>
+                                    <div>
+                                        <h3>{station.popup}</h3>
+                                        <Link to={`/map/${station.id}`} className="text-blue-500 hover:underline">
+                                            View Station Details
+                                        </Link>
+                                    </div>
+                                </Popup>
                             </Marker>
                         ))
                     }

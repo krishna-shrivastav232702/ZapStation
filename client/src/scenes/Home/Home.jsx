@@ -38,7 +38,7 @@ const Home = () => {
             <div className="flex items-center space-x-6 mr-12">
               {
                 user ? (
-                  <Link to="/logout" className="text-black font-semibold px-6 py-3 rounded-full hover:bg-white hover:text-black transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl">
+                  <Link to="/logout" className="text-white bg-black hover:scale-105 font-semibold px-6 py-3 rounded-full  transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl">
                     Logout
                   </Link>
                 ) : (

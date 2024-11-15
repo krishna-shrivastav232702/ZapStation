@@ -6,6 +6,8 @@ import Login from '../scenes/authentications/Login';
 import Logout from '../scenes/authentications/Logout';
 import Home from '../scenes/Home/Home';
 import Map from '../components/Map/Map';
+import SingleStation from '../components/SingleStation/SingleStation';
+import Confirmation from '../components/Confirmation';
 
 
 const Router = createBrowserRouter([
@@ -31,6 +33,16 @@ const Router = createBrowserRouter([
       },{
         path:"/map",
         element:<Map/>
+      },
+      {
+        path:"/map/:id",
+        element:<SingleStation/>,
+        loader:({params})=>fetch(`http://localhost:7019/station/api/station/${params._id}`)
+      },
+      {
+        path:"/bookSlot/:slotid/:uid",
+        element:<Confirmation/>,
+        loader:({params})=>fetch(`http://localhost:7019/slot/bookslot/${params._id}/${params.uid}`)
       }
     ]
   }

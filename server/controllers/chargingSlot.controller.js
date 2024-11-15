@@ -42,7 +42,7 @@ export const bookSlot = async (req,res)=>{
             return req.status(400).json({message:"Slot is booked or reserved"});
         }
 
-        const user = await User.findById({_id:userId});
+        const user = await User.findOne({uid:userId});
         if(!user){
             return res.status(400).json({message:"User not found"});
         }
@@ -69,7 +69,7 @@ export const bookSlot = async (req,res)=>{
 
     }catch(error){
         console.error(`Error booking slot :${error.message}`);
-        return req.status(500).json({message:"Internal Server error while booking slot"});
+        return res.status(500).json({message:"Internal Server error while booking slot"});
     }
 }
 

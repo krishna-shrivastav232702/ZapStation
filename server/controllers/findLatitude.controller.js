@@ -1,7 +1,7 @@
 import Address from "../models/addressInfo.model.js";
 
 const findLatitudes = async(req,res)=>{
-        const {geodata}=req.query;
+        const {geodata,uuid}=req.query;
         if(!geodata){
             return res.status(400).json({message:"Latitude and longitude are not fetched"});
         }

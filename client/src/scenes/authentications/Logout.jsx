@@ -16,7 +16,7 @@ const Logout = () => {
   }
   return (
     <div className='h-screen bg-pastelGreen flex items-center justify-center'>
-      <button className='bg-white font-black  hover:bg-black hover:text-white px-4 py-2 rounded-2xl transition duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-105 ' onClick={handleLogout}>Logout</button>
+      <button className='text-black bg-white font-bold p-2 rounded-2xl hover:bg-black hover:text-white transition duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-105 mr-4' onClick={handleLogout}>Logout</button>
     </div>
   )
 }
