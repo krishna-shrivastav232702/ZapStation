@@ -1,6 +1,6 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from "axios";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { Icon } from "leaflet";
 import { Link, useNavigate } from 'react-router-dom';
 import "leaflet/dist/leaflet.css";
@@ -10,18 +10,34 @@ const Map = () => {
     const [location, setLocation] = useState("");
     const [timeSlot, setTimeSlot] = useState("");
     const [stations, setStations] = useState([]);
-    const query = new URLSearchParams(useLocation().search)
+    const [mapCenter, setMapCenter] = useState([12.9716, 77.5946]); 
+    const query = new URLSearchParams(useLocation().search);
     const navigate = useNavigate();
 
+    const ChangeMapCenter = ({ center }) => {
+        const map = useMap(); 
+        useEffect(() => {
+            map.setView(center); 
+        }, [center]);
+        return null;
+    };
 
     useEffect(() => {
         const loc = query.get("location");
-        if (loc && loc !== location) {  
-            setLocation(loc);  
-            fetchStations(loc);
+        if (loc && loc !== location) {
+            setLocation(loc);
+            updateMapData(loc); 
         }
-    }, [query, location]); 
+    }, [query, location]);
 
+    const updateMapData = async (location) => {
+        try {
+            await fetchStations(location);  
+            await fetchGeocode(location);   
+        } catch (error) {
+            console.error("Error updating map data:", error);
+        }
+    };
 
     const fetchStations = async (location) => {
         try {
@@ -51,7 +67,29 @@ const Map = () => {
 
             setStations(stationMarkers);
         } catch (error) {
-            console.error("error fetching stations");
+            console.error("Error fetching stations", error);
+        }
+    };
+
+    const fetchGeocode = async (location) => {
+        try {
+            const response = await axios.get("https://nominatim.openstreetmap.org/search", {
+                params: {
+                    q: location,
+                    format: "json",
+                    limit: 1,
+                },
+                headers: {
+                    "User-Agent": "ZapStation (krishnashrivastava23@gmail.com)",
+                },
+            });
+
+            if (response.data && response.data.length > 0) {
+                const { lat, lon } = response.data[0];
+                setMapCenter([lat, lon]); 
+            }
+        } catch (error) {
+            console.error("Error fetching geocode:", error);
         }
     };
 
@@ -59,22 +97,23 @@ const Map = () => {
         e.preventDefault();
         if (location) {
             navigate(`?location=${location}`);
-            await fetchStations(location); 
+            updateMapData(location);
         } else {
             console.error("Location is required!");
         }
     };
 
-    const customIcon = new Icon({
-        iconUrl: "https://cdn-icons-png.flaticon.com/128/2776/2776067.png",
-        iconSize: [34, 34]
-    });
-
     const handleLocationChange = (e) => {
         const newLocation = e.target.value;
-        setLocation(newLocation);  // Update the location state
-        navigate(`?location=${newLocation}`);  // Update the URL with the new location query
+        setLocation(newLocation);
+        navigate(`?location=${newLocation}`);
+        updateMapData(newLocation); 
     };
+
+    const customIcon = new Icon({
+        iconUrl: "https://cdn-icons-png.flaticon.com/128/2776/2776067.png",
+        iconSize: [34, 34],
+    });
 
     return (
         <div className='flex min-h-screen'>
@@ -125,23 +164,28 @@ const Map = () => {
                     </div>
                 </form>
 
-                <MapContainer center={[12.9716, 77.5946]} zoom={13} style={{
-                    position: "fixed",
-                    top: 0,
-                    right: 0,
-                    width: "50%",
-                    height: "80vh",
-                    marginTop: "90px",
-                    marginRight: "80px",
-                    marginBottom: "80px",
-                    zIndex: 1000,
-                    borderRadius: "10px 0 0 10px",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                }}>
+                <MapContainer
+                    center={mapCenter}
+                    zoom={13}
+                    style={{
+                        position: "fixed",
+                        top: 0,
+                        right: 0,
+                        width: "50%",
+                        height: "80vh",
+                        marginTop: "90px",
+                        marginRight: "80px",
+                        marginBottom: "80px",
+                        zIndex: 1000,
+                        borderRadius: "10px 0 0 10px",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                    }}
+                >
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
+                    <ChangeMapCenter center={mapCenter} />
                     {
                         stations.map((station) => (
                             <Marker key={station.id} position={station.geocode} icon={customIcon}>
@@ -158,7 +202,7 @@ const Map = () => {
                     }
                 </MapContainer>
             </div>
-        </div >
+        </div>
     );
 };
 
